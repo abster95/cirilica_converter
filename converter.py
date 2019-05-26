@@ -30,4 +30,21 @@ def cirilica_to_latinica(text: str):
             translated += char
     return translated
 
-print(cirilica_to_latinica("Ово је реченица преведена са ћирилице на латиницу! Љубим вас и њивим :)"))
+def latinica_to_cirilica(text: str):
+    problematic = ['л', 'н', 'Л', 'Н']
+    translated = ''
+    for char in text:
+        if char == 'j':
+            if translated[-1:] in problematic:
+                translated = translated[:-1] + lookup[cirilica_to_latinica(translated[-1:])+char]
+                continue
+        if char in lookup:
+            translated += lookup[char]
+        else:
+            translated += char
+    return translated
+
+text = "Čovek piše tekst na latinici. Ljubi majka sina svoga, njeno ljalje Njegoš!!"
+print(text)
+print(latinica_to_cirilica(text))
+
