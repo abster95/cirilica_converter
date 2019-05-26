@@ -53,10 +53,6 @@ def latinica_to_cirilica(text: str):
     return translated
 
 
-# text = "Čovek piše tekst na latinici. Ljubi majka sina svoga, njeno ljalje Njegoš!!"
-# print(text)
-# print(latinica_to_cirilica(text))
-
 def resolve_text(text):
     if os.path.exists(text):
         with open(text, 'r', encoding='utf8') as fp:
@@ -74,6 +70,7 @@ def translate(text, output, func):
     print(translated)
     with open(output, 'w', encoding='utf8') as fp:
         fp.write(translated)
+    return translated
 
 def translate_cirilica(args):
     text = args.text
@@ -81,7 +78,7 @@ def translate_cirilica(args):
     if not output:
         output = get_out_path(text, "latinica")
     text = resolve_text(text)
-    translate(text,output, cirilica_to_latinica)
+    return translate(text,output, cirilica_to_latinica)
 
 def translate_latinica(args):
     text = args.text
@@ -89,7 +86,7 @@ def translate_latinica(args):
     if not output:
         output = get_out_path(text, "cirilica")
     text = resolve_text(text)
-    translate(text,output, latinica_to_cirilica)
+    return translate(text,output, latinica_to_cirilica)
 
 
 
