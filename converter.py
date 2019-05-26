@@ -21,8 +21,10 @@ for c, l in zip(cirilica, latinica):
 
 lookup['њ'.capitalize()] = 'Nj'
 lookup['љ'.capitalize()] = 'Lj'
+lookup['џ'.capitalize()] = 'Dž'
 lookup['Nj'] = 'њ'.capitalize()
 lookup['Lj'] = 'љ'.capitalize()
+lookup['Dž'] = 'џ'.capitalize()
 
 
 def cirilica_to_latinica(text: str):
@@ -37,11 +39,11 @@ def cirilica_to_latinica(text: str):
 
 
 def latinica_to_cirilica(text: str):
-    problematic = ['л', 'н', 'Л', 'Н']
+    problematic = ['л', 'н', 'Л', 'Н', 'д', 'Д']
     translated = ''
     relevant = latinica + [l.capitalize() for l in latinica]
     for char in text:
-        if char == 'j':
+        if char == 'j' or char == 'ž':
             if translated[-1:] in problematic:
                 translated = translated[:-1] + \
                     lookup[cirilica_to_latinica(translated[-1:])+char]
