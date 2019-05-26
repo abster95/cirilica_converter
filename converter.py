@@ -1,4 +1,7 @@
 import typing
+import argparse
+import os
+
 cirilica = ['а', 'б', 'в', 'г', 'д', 'ђ', 'е', 'ж', 'з', 'и', 'ј', 'к', 'л', 'љ',
             'м', 'н', 'њ', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ћ', 'џ', 'ш']
 
@@ -21,30 +24,92 @@ lookup['љ'.capitalize()] = 'Lj'
 lookup['Nj'] = 'њ'.capitalize()
 lookup['Lj'] = 'љ'.capitalize()
 
+
 def cirilica_to_latinica(text: str):
     translated = ''
+    relevant = cirilica + [c.capitalize() for c in cirilica]
     for char in text:
-        if char in lookup:
+        if char in lookup and char in relevant:
             translated += lookup[char]
         else:
             translated += char
     return translated
+
 
 def latinica_to_cirilica(text: str):
     problematic = ['л', 'н', 'Л', 'Н']
     translated = ''
+    relevant = latinica + [l.capitalize() for l in latinica]
     for char in text:
         if char == 'j':
             if translated[-1:] in problematic:
-                translated = translated[:-1] + lookup[cirilica_to_latinica(translated[-1:])+char]
+                translated = translated[:-1] + \
+                    lookup[cirilica_to_latinica(translated[-1:])+char]
                 continue
-        if char in lookup:
+        if char in lookup and char in relevant:
             translated += lookup[char]
         else:
             translated += char
     return translated
 
-text = "Čovek piše tekst na latinici. Ljubi majka sina svoga, njeno ljalje Njegoš!!"
-print(text)
-print(latinica_to_cirilica(text))
 
+# text = "Čovek piše tekst na latinici. Ljubi majka sina svoga, njeno ljalje Njegoš!!"
+# print(text)
+# print(latinica_to_cirilica(text))
+
+def resolve_text(text):
+    if os.path.exists(text):
+        with open(text, 'r', encoding='utf8') as fp:
+            text = fp.read()
+    return text
+
+def get_out_path(text, translation):
+    output = translation + ".txt"
+    if os.path.exists(text):
+        output =  os.path.splitext(text)[0] + "_" + output
+    return output
+
+def translate(text, output, func):
+    translated = func(text)
+    print(translated)
+    with open(output, 'w', encoding='utf8') as fp:
+        fp.write(translated)
+
+def translate_cirilica(args):
+    text = args.text
+    output = args.output
+    if not output:
+        output = get_out_path(text, "latinica")
+    text = resolve_text(text)
+    translate(text,output, cirilica_to_latinica)
+
+def translate_latinica(args):
+    text = args.text
+    output = args.output
+    if not output:
+        output = get_out_path(text, "cirilica")
+    text = resolve_text(text)
+    translate(text,output, latinica_to_cirilica)
+
+
+
+def add_cirilica_to_latinica_subparser(subparsers):
+    parser = subparsers.add_parser("cirilica2latinica")
+    parser.add_argument("text", type=str, help="Text or file containing text in cyrillic")
+    parser.add_argument("--output", type=str, required=False, default='', help="Output file for text in latin")
+    parser.set_defaults(function=translate_cirilica)
+
+def add_latinica_to_cirilica_subparser(subparsers):
+    parser = subparsers.add_parser("latinica2cirilica")
+    parser.add_argument("text", type=str, help="Text or file containing text in latin")
+    parser.add_argument("--output", type=str, required=False, default='', help="Output file for text in cyrillic")
+    parser.set_defaults(function=translate_latinica)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Converts strings or documents from Cyrillic to Latin and vice versa")
+    subparsers = parser.add_subparsers()
+    add_cirilica_to_latinica_subparser(subparsers)
+    add_latinica_to_cirilica_subparser(subparsers)
+    args = parser.parse_args()
+    args.function(args)
